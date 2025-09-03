@@ -13,7 +13,7 @@ export const sequelize = new Sequelize(
   }
 );
 
-export const starDb = async () => {
+export const startDb = async () => {
   try {
     await sequelize.authenticate();
 
