@@ -1,18 +1,19 @@
 import { sequelize } from "../config/database.js";
 import { DataTypes } from "sequelize";
+import { userModel } from "./user.model.js";
 
 export const profileModel = sequelize.define(
   "Profile",
   {
-    user_id: {
-      type: DataTypes.INTEGER(20),
-      allowNull: false,
-      unique: true,
-      references: {
-        model: "userModel",
-        key: "id",
-      },
-    },
+    // user_id: {
+    //   type: DataTypes.INTEGER(20),
+    //   allowNull: false,
+    //   unique: true,
+    //   references: {
+    //     model: "userModel",
+    //     key: "id",
+    //   },
+    //},
     first_name: {
       type: DataTypes.STRING(50),
       allowNull: false,
@@ -38,3 +39,9 @@ export const profileModel = sequelize.define(
     timestamps: true,
   }
 );
+profileModel.belongsTo(userModel, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+});
+
+userModel.hasOne(profileModel, { foreignKey: "user_id" });
