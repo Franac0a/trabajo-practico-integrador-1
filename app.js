@@ -28,8 +28,8 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, async () => {
-  await sequelize.authenticate();
-  await sequelize.sync();
+  // await sequelize.authenticate();
+  // await sequelize.sync();
   console.log(`El server está corriendo en: http://localhost:${PORT}`);
 });
 
