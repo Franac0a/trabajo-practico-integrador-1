@@ -1,36 +1,63 @@
 import { Router } from "express";
-import { auth } from "../middlewares/auth.js";
-import { owner } from "../middlewares/owner.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 import {
   createArticle,
-  listArticles,
-  getArticle,
-  listMyArticles,
-  getMyArticle,
   updateArticle,
-  archiveArticle,
+  getUserArticles,
+  getAllArticles,
+  getArticleById,
+  deleteArticle,
 } from "../controllers/articles.controller.js";
+import { applyValidations } from "../middlewares/validator.js";
+import { ownerMiddleware } from "../middlewares/owner.middleware.js";
+import { adminMiddleware } from "../middlewares/admin.middleware.js";
 import {
-  articleCreateValidator,
-  articleUpdateValidator,
-  articleIdParamValidator,
-} from "../middlewares/validations/validator.js";
+  createArticleValidations,
+  updateArticleValidations,
+  deleteArticleValidations,
+  getArticleByIdValidations,
+} from "../middlewares/validations/article.validations.js";
+import { authorAdminMiddleware } from "../middlewares/author_admin.middleware.js";
 
-const articlesRouter = Router();
-articlesRouter.use(auth);
+export const articleRouter = Router();
 
-articlesRouter.post("/", articleCreateValidator, createArticle);
-articlesRouter.get("/", listArticles);
-articlesRouter.get("/:id", articleIdParamValidator, getArticle);
-articlesRouter.get("/user/mine", listMyArticles);
-articlesRouter.get("/user/:id", articleIdParamValidator, getMyArticle);
-articlesRouter.put(
-  "/:id",
-  articleIdParamValidator,
-  owner,
-  articleUpdateValidator,
+articleRouter.post(
+  "/articles",
+  authMiddleware,
+  createArticleValidations,
+  applyValidations,
+  createArticle
+);
+articleRouter.get("/articles/user", authMiddleware, getUserArticles);
+articleRouter.get("/articles", authMiddleware, getAllArticles);
+articleRouter.get(
+  "/articles/:id",
+  authMiddleware,
+  getArticleByIdValidations,
+  applyValidations,
+  getArticleById
+);
+
+articleRouter.get(
+  "/articles/user/:id",
+  authMiddleware,
+  getArticleByIdValidations,
+  applyValidations,
+  getArticleById
+);
+articleRouter.put(
+  "/articles/:id",
+  authMiddleware,
+  authorAdminMiddleware,
+  updateArticleValidations,
+  applyValidations,
   updateArticle
 );
-articlesRouter.delete("/:id", articleIdParamValidator, owner, archiveArticle);
-
-export default articlesRouter;
+articleRouter.delete(
+  "/articles/:id",
+  authMiddleware,
+  authorAdminMiddleware,
+  deleteArticleValidations,
+  applyValidations,
+  deleteArticle
+);

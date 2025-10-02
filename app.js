@@ -1,36 +1,48 @@
+import { initDB } from "./src/config/database.js";
 import express from "express";
-import "dotenv/config";
-import { sequelize, startDb } from "./src/config/database.js";
-import { userModel } from "./src/models/user.model.js";
-import { profileModel } from "./src/models/profile.model.js";
-import { articleModel } from "./src/models/article.model.js";
-import { articleTagModel } from "./src/models/articleTag.model.js";
-import { tagModel } from "./src/models/tag.model.js";
+import dotenv from "dotenv";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+//-------------------------creacion de tablas-------------------------
+// import { articleModel } from "./src/models/article.model.js";
+// import { tagModel } from "./src/models/tag.model.js";
+// import { articleTagModel } from "./src/models/article_tag.model.js";
+// import { userModel } from "./src/models/user.model.js";
+// import { profileModel } from "./src/models/profile.model.js";
+//--------------------------------------------------------------------
+//-------------------------importacion de rutas------------------------
+import { authRouter } from "./src/routes/auth.routes.js";
+import { tagRouter } from "./src/routes/tag.routes.js";
+import { userRouter } from "./src/routes/user.routes.js";
+import { articleRouter } from "./src/routes/article.routes.js";
+import { articleTagRouter } from "./src/routes/article_tag.routes.js";
 
+dotenv.config();
+const PORT = process.env.PORT || 4000;
 const app = express();
-const PORT = process.env.PORT;
 
 app.use(express.json());
-app.get("/api");
+app.use(cookieParser()); // NECESARIO: para leer req.cookies
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true, // CRUCIAL: permitir cookies
+  })
+);
 
-const startServer = async () => {
-  await startDb();
-  await userModel.sync();
-  await profileModel.sync();
-  await articleModel.sync();
-  await articleTagModel.sync();
-  await tagModel.sync();
-  console.log("Tablas creadas");
-};
+app.use("/api", authRouter);
+app.use("/api", tagRouter);
+app.use("/api", userRouter);
+app.use("/api", articleRouter);
+app.use("/api", articleTagRouter);
 
-app.get("/", (req, res) => {
-  res.send("Server ready");
+//manejo de rutas
+app.use((req, res) => {
+  res.status(404).json({ message: "Ruta no encontrada" });
 });
 
-app.listen(PORT, async () => {
-  // await sequelize.authenticate();
-  // await sequelize.sync();
-  console.log(`El server está corriendo en: http://localhost:${PORT}`);
+initDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Servidor escuchando en el puerto ${PORT}`);
+  });
 });
-
-startServer();

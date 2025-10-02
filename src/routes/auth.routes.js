@@ -1,24 +1,37 @@
 import { Router } from "express";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 import {
   register,
   login,
-  profile,
-  updateProfile,
   logout,
+  getProfile,
+  updateProfile,
 } from "../controllers/auth.controller.js";
-import { auth } from "../middlewares/auth.js";
+
+import { applyValidations } from "../middlewares/validator.js";
 import {
-  registerValidator,
-  loginValidator,
-  profileUpdateValidator,
-} from "../middlewares/validations/validator.js";
+  updateProfileValidations,
+  createRegisterValidations,
+} from "../middlewares/validations/auth.validations.js";
 
-const authRouter = Router();
+export const authRouter = Router();
 
-authRouter.post("/register", registerValidator, register);
-authRouter.post("/login", loginValidator, login);
-authRouter.put("/profile", auth, profileUpdateValidator, updateProfile);
-authRouter.put("/profile", auth, profileUpdateValidator, updateProfile);
-authRouter.post("/logout", auth, logout);
+//rutas publicas
+authRouter.post(
+  "/auth/register",
+  createRegisterValidations,
+  applyValidations,
+  register
+);
+authRouter.post("/auth/login", login);
 
-export default authRouter;
+//rutas privadas
+authRouter.post("/auth/logout", authMiddleware, logout);
+authRouter.get("/auth/profile", authMiddleware, getProfile);
+authRouter.put(
+  "/auth/profile",
+  authMiddleware,
+  updateProfileValidations,
+  applyValidations,
+  updateProfile
+);
