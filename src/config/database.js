@@ -13,14 +13,13 @@ export const sequelize = new Sequelize(
   }
 );
 
-export const startDb = async () => {
+export const initDB = async () => {
   try {
     await sequelize.authenticate();
-
-    await sequelize.sync(); //({ force: true });
-    console.log("Se establecio conexion con la base de datos");
+    console.log("conexion exitosa a la bd");
+    await sequelize.sync({ altere: true });
   } catch (error) {
+    console.log("error al conectar con la bd");
     console.log(error);
-    console.log("Error al conectar la base de datos");
   }
 };

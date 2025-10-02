@@ -1,6 +1,7 @@
 import { matchedData } from "express-validator";
 import { userModel } from "../models/user.model.js";
 import { profileModel } from "../models/profile.model.js";
+import { articleModel } from "../models/article.model.js";
 
 export const updateUser = async (req, res) => {
   try {
@@ -19,47 +20,48 @@ export const updateUser = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const users = await userModel.findAll({
-      attributes: {
-        exclude: ["password"],
-        include: [
-          {
-            model: profileModel,
-            as: "profile",
-          },
-        ],
-      },
+      attributes: { exclude: ["password"] },
+      include: { model: profileModel, as: "profile" },
     });
 
-    res.status(200).json(users);
-  } catch (error) {}
+    await res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ msg: "error en el servidor", error: error.message });
+  }
 };
 
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await userModel.findByPk(id, {
-      attributes: {
-        exclude: ["password"],
-        include: {
+      attributes: { exclude: ["password", "createdAt", "updatedAt"] },
+      include: [
+        {
           model: profileModel,
           as: "profile",
+          attributes: { exclude: ["createdAt", "updatedAt"] },
         },
-      },
+        {
+          model: articleModel,
+          as: "articles",
+          attributes: { exclude: ["createdAt", "updatedAt"] },
+        },
+      ],
     });
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ msg: "error en el servidor" });
+    res.status(500).json({ msg: "error en el servidor", error: error.message });
   }
 };
 
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await userModel.findAll(id);
+    const user = await userModel.findByPk(id);
 
-    await user.detroy();
+    await user.destroy();
     res.status(200).json({ msg: "usuario eliminado correctamente" });
   } catch (error) {
-    res.status(500).json({ msg: "error en el servidor" });
+    res.status(500).json({ msg: "error en el servidor", error: error.message });
   }
 };

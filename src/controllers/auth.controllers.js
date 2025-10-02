@@ -3,6 +3,7 @@ import { generateToken } from "../helpers/jwt.helper.js";
 import { userModel } from "../models/user.model.js";
 import { profileModel } from "../models/profile.model.js";
 import { hashPassword, comparePassword } from "../helpers/bcrypt.helper.js";
+import { matchedData } from "express-validator";
 
 export const register = async (req, res) => {
   try {
@@ -47,8 +48,8 @@ export const login = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const user = userModel.findOne({
-      where: { username: username },
+    const user = await userModel.findOne({
+      where: { username },
       include: {
         model: profileModel,
         as: "profile",
@@ -70,7 +71,10 @@ export const login = async (req, res) => {
     }
 
     //creacion de token:
-    const token = generateToken(user);
+    const token = generateToken({
+      id: user.id,
+      role: user.role,
+    });
 
     //se envia ese token generado como cookie
     res.cookie("token", token, {
@@ -80,6 +84,7 @@ export const login = async (req, res) => {
 
     return res.json({ msg: "Login exitoso" });
   } catch (error) {
+    console.log(error);
     res
       .status(500)
       .json({ msg: "error en el servidor al loggear", error: error.msg });
@@ -120,11 +125,12 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const data = matchedData(req, { locations: ["body"] });
-
     const userId = req.user.id;
 
     await profileModel.update(data, { where: { user_id: userId } });
 
+    // console.log("req.body:", req.body);
+    // console.log("matchedData:", data);
     return res.json({ msg: "Perfil actualizado correctamente" });
   } catch (error) {
     return res

@@ -1,14 +1,14 @@
 import { matchedData } from "express-validator";
 import { articleTagModel } from "../models/article_tag.model.js";
 
-export const createAticleTag = async (req, res) => {
+export const createArticleTag = async (req, res) => {
   try {
     const data = matchedData(req);
-
+    console.log(data);
     const articleTag = await articleTagModel.create(data);
     return res.status(201).json(articleTag);
   } catch (error) {
-    return res.status(500).json({ error: error.msg });
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -20,7 +20,7 @@ export const deleteArticleTag = async (req, res) => {
 
     await articleTag.destroy();
 
-    return res.status(200).jsom({ msg: "relacion eliminada" });
+    return res.status(200).json({ msg: "relacion eliminada" });
   } catch (error) {
     return res
       .status(500)
