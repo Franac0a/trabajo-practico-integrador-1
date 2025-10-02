@@ -1,47 +1,14 @@
-import { sequelize } from "../config/database.js";
 import { DataTypes } from "sequelize";
+import { sequelize } from "../config/database.js";
 import { userModel } from "./user.model.js";
 
-export const profileModel = sequelize.define(
-  "Profile",
-  {
-    // user_id: {
-    //   type: DataTypes.INTEGER(20),
-    //   allowNull: false,
-    //   unique: true,
-    //   references: {
-    //     model: "userModel",
-    //     key: "id",
-    //   },
-    //},
-    first_name: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    last_name: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    biography: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    avatar_url: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
-    birth_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-profileModel.belongsTo(userModel, {
-  foreignKey: "user_id",
-  onDelete: "CASCADE",
+export const profileModel = sequelize.define("Profile", {
+  first_name: { type: DataTypes.STRING(50), allowNull: false },
+  last_name: { type: DataTypes.STRING(50), allowNull: false },
+  biography: { type: DataTypes.TEXT, allowNull: true },
+  avatar_url: { type: DataTypes.STRING(255), allowNull: true },
+  birth_date: { type: DataTypes.DATE, allowNull: true },
 });
 
-userModel.hasOne(profileModel, { foreignKey: "user_id" });
+userModel.hasOne(profileModel, { foreignKey: "user_id", as: "profile" });
+profileModel.belongsTo(userModel, { foreignKey: "user_id", as: "user " });
