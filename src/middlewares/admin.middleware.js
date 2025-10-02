@@ -7,6 +7,8 @@ export const adminMiddleware = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    return res.status(500).json({ message: "Error interno del servidor" });
+    return res
+      .status(500)
+      .json({ message: "Error interno del servidor", error: error.message });
   }
 };

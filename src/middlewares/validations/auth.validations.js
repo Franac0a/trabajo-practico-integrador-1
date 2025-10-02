@@ -1,4 +1,4 @@
-import { body, param } from "express-validator";
+import { body } from "express-validator";
 import { userModel } from "../../models/user.model.js";
 
 export const createRegisterValidations = [
@@ -9,12 +9,13 @@ export const createRegisterValidations = [
     .isAlphanumeric()
     .withMessage("el username debe de ser alfanumerico")
     .custom(async (username) => {
-      await userModel.findOne({ where: { username } });
-      if (username) {
+      const user = await userModel.findOne({ where: { username } });
+      if (user) {
         throw new Error("el username ya existe");
       }
+      return true;
     })
-    .length({ min: 3, max: 20 })
+    .isLength({ min: 3, max: 20 })
     .withMessage("el username debe de tener entre 3 y 20 caracteres"),
 
   body("email")
@@ -23,25 +24,28 @@ export const createRegisterValidations = [
     .isEmail()
     .withMessage("el email debe de tener un formato valido")
     .custom(async (email) => {
-      await userModel.findOne({ where: { email } });
-      if (email) {
+      const existingEmail = await userModel.findOne({ where: { email } });
+      if (existingEmail) {
         throw new Error("ya existe un usuario con ese email");
       }
+      return true;
     }),
   body("password")
     .notEmpty()
     .withMessage("la contraseña es obligatoria")
     .isLength({ min: 8 })
-    .withMessage("la contraseña debe de tener minimo 8 caracteres")
+    .withMessage(
+      "la contraseña debe de tener minimo 8 caracteres, 1 minuscula, 1 mayuscula y 1 numero"
+    )
     .isStrongPassword({
       minLength: 8,
       minLowercase: 1,
       minUppercase: 1,
       minNumbers: 1,
+      minSymbols: 0,
     }),
   body("role")
-    .notEmpty()
-    .withMessage("el rol el obligatoeio")
+    .optional()
     .isIn(["admin", "user"])
     .withMessage("rol no permitido, debe de ser user/admin"),
   body("first_name")

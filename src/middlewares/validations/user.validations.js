@@ -34,7 +34,7 @@ export const updateUserValidations = [
     .trim()
     .isAlphanumeric()
     .withMessage("el username debe de ser alfanumerico")
-    .length({ min: 3, max: 20 })
+    .isLength({ min: 3, max: 20 })
     .withMessage("el username debe de tener entre 3 y 20 caracteres")
     .custom(async (username) => {
       const user = await userModel.findOne({ where: { username } });
